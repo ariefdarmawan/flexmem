@@ -2,8 +2,7 @@ package flexmem
 
 type Response struct {
 	Data []byte
-
-	err error
+	err  error
 }
 
 func (res *Response) Err() error {

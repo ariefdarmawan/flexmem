@@ -20,6 +20,6 @@ func (k *kvdb) Status() string {
 		time.Since(k.start), k.start)
 }
 
-func (k *kvdb) Hello(name string) string {
-	return fmt.Sprintf("Hello %s, welcome to kvdb server", name)
+func (k *kvdb) Ping(name string) string {
+	return fmt.Sprintf("Hi %s, welcome to kvdb server", name)
 }
