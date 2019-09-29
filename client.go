@@ -22,7 +22,7 @@ func NewClient(host string) (*Client, error) {
 	return c, nil
 }
 
-func (c *Client) Call(name string, data []byte) *Response {
+func (c *Client) Call(name string, parms ...interface{}) *Response {
 	res := new(Response)
 	if c.rc == nil {
 		res.err = fmt.Errorf("rpc client is not properly initialized")
@@ -31,10 +31,10 @@ func (c *Client) Call(name string, data []byte) *Response {
 
 	req := new(Request)
 	req.Name = name
-	req.Parm = data
+	req.Parm = parms
 
 	if err := c.rc.Call("RpcProxy.Call", req, res); err != nil {
-		res.err = fmt.Errorf("%s erorr: %s", name, err.Error())
+		res.err = fmt.Errorf("%s error: %s", name, err.Error())
 		return res
 	}
 

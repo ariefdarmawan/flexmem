@@ -23,13 +23,24 @@ func TestServer(t *testing.T) {
 			fmc, err := flexmem.NewClient(host)
 			convey.So(err, convey.ShouldBeNil)
 
-			convey.Convey("call", func() {
-				r := fmc.Call("kvdb.status", nil)
-				convey.So(r.Err(), convey.ShouldBeNil)
+			convey.Convey("call status", func() {
+				r1 := fmc.Call("kvdb.status")
+				convey.So(r1.Err(), convey.ShouldBeNil)
 
 				convey.Convey("validate", func() {
-					data := string(r.Data)
+					data := string(r1.Data)
 					convey.So(data, convey.ShouldContainSubstring, "It has been run")
+					fmt.Println("Validate result:", data)
+				})
+			})
+
+			convey.Convey("call hello", func() {
+				r1 := fmc.Call("kvdb.hello", "Arief Darmawan")
+				convey.So(r1.Err(), convey.ShouldBeNil)
+
+				convey.Convey("validate", func() {
+					data := string(r1.Data)
+					convey.So(data, convey.ShouldContainSubstring, "welcome to kvdb server")
 					fmt.Println("Validate result:", data)
 				})
 			})

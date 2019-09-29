@@ -19,3 +19,7 @@ func (k *kvdb) Status() string {
 	return fmt.Sprintf("Sebar In-Memory Server v 1.0\nIt has been run for %v from %v",
 		time.Since(k.start), k.start)
 }
+
+func (k *kvdb) Hello(name string) string {
+	return fmt.Sprintf("Hello %s, welcome to kvdb server", name)
+}

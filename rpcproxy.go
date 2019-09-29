@@ -52,8 +52,16 @@ func (r *RpcProxy) Call(request Request, response *Response) error {
 			return
 		}
 
-		ins := []reflect.Value{}
-		outs := fn.Call(ins)
+		var ins []reflect.Value
+		var outs []reflect.Value
+		if len(request.Parm) > 0 {
+			ins = make([]reflect.Value, len(request.Parm))
+			for idx, parm := range request.Parm {
+				ins[idx] = reflect.ValueOf(parm)
+			}
+		}
+		//fmt.Println("call", name, "number of parms", len(request.Parm), "raw:", ins, "json:", toolkit.JsonString(ins))
+		outs = fn.Call(ins)
 		response.Data = toolkit.ToBytes(outs[0].Interface(), "")
 	}()
 
