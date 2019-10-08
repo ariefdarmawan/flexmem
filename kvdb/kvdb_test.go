@@ -1,13 +1,13 @@
-package flexmem_test
+package kvdb_test
 
 import (
 	"strings"
 	"testing"
 	"time"
 
+	//flexmem "github.com/ariefdarmawan/flexmem/fmserver"
+	"github.com/ariefdarmawan/flexmem/kvdb"
 	"github.com/eaciit/toolkit"
-
-	"github.com/ariefdarmawan/flexmem"
 
 	"github.com/smartystreets/goconvey/convey"
 )
@@ -21,7 +21,7 @@ func TestKvDB(t *testing.T) {
 		keys := []string{}
 		table := "test"
 
-		db := flexmem.NewKvDB()
+		db := kvdb.NewKvDB()
 
 		errs := []string{}
 		for i := 0; i < dataCount; i++ {
@@ -36,7 +36,7 @@ func TestKvDB(t *testing.T) {
 		convey.So(errTxt, convey.ShouldEqual, "")
 
 		convey.Convey("get all data", func() {
-
+			//db.Query()
 		})
 	})
 }

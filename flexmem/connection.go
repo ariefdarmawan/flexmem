@@ -4,17 +4,19 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/ariefdarmawan/flexmem/fmclient"
+
 	"git.eaciitapp.com/sebar/dbflex"
 )
 
 type Connection struct {
 	dbflex.ConnectionBase `bson:"-" json:"-"`
 	ctx                   context.Context
-	client                *Client
+	client                *fmclient.Client
 }
 
 func (c *Connection) Connect() error {
-	cl, err := NewClient(c.Host)
+	cl, err := fmclient.NewClient(c.Host)
 	if err != nil {
 		return fmt.Errorf("sebarmem connect fail. %s", err.Error())
 	}

@@ -1,8 +1,9 @@
-package flexmem
+package fmserver
 
 import (
 	"fmt"
 
+	"github.com/ariefdarmawan/flexmem/kvdb"
 	"github.com/ariefdarmawan/rpchub/hubserver"
 
 	"github.com/eaciit/toolkit"
@@ -25,7 +26,7 @@ func (s *Server) Start(host string) error {
 	}
 
 	hs := hubserver.NewServer().SetLog(s.log)
-	hs.Register(NewKvDB())
+	hs.Register(kvdb.NewKvDB())
 	if err := hs.Start(host); err != nil {
 		return fmt.Errorf("unable to start flexmem server. %s", err.Error())
 	}

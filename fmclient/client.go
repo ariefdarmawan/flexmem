@@ -1,4 +1,4 @@
-package flexmem
+package fmclient
 
 import (
 	"fmt"

@@ -1,11 +1,12 @@
-package flexmem_test
+package fmserver_test
 
 import (
 	"testing"
 
+	"github.com/ariefdarmawan/flexmem/fmclient"
+	"github.com/ariefdarmawan/flexmem/fmserver"
 	"github.com/eaciit/toolkit"
 
-	"github.com/ariefdarmawan/flexmem"
 	"github.com/smartystreets/goconvey/convey"
 )
 
@@ -15,14 +16,14 @@ var (
 
 func TestServer(t *testing.T) {
 	convey.Convey("prepare server", t, func() {
-		fms := new(flexmem.Server).
+		fms := new(fmserver.Server).
 			SetLogger(toolkit.NewLogEngine(false, false, "", "", ""))
 		err := fms.Start(host)
 		convey.So(err, convey.ShouldBeNil)
 		defer fms.Stop()
 
 		convey.Convey("client", func() {
-			fmc, err := flexmem.NewClient(host)
+			fmc, err := fmclient.NewClient(host)
 			convey.So(err, convey.ShouldBeNil)
 
 			convey.Convey("call status", func() {
