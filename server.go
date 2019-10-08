@@ -2,15 +2,16 @@ package flexmem
 
 import (
 	"fmt"
-	"net"
-	"net/rpc"
+
+	"github.com/ariefdarmawan/rpchub/hubserver"
 
 	"github.com/eaciit/toolkit"
 )
 
 type Server struct {
-	listener net.Listener
-	log      *toolkit.LogEngine
+	//listener net.Listener
+	log *toolkit.LogEngine
+	hs  *hubserver.Server
 }
 
 func (s *Server) SetLogger(logger *toolkit.LogEngine) *Server {
@@ -23,30 +24,22 @@ func (s *Server) Start(host string) error {
 		s.log = toolkit.NewLogEngine(true, false, "", "", "")
 	}
 
-	r := rpc.NewServer()
-	p := new(RpcProxy).setLogger(s.log)
-	RegisterRpcObjectToProxy(p, newKvdb())
-	if err := r.Register(p); err != nil {
-		return fmt.Errorf("start server fail. %s", err.Error())
+	hs := hubserver.NewServer().SetLog(s.log)
+	hs.Register(NewKvDB())
+	if err := hs.Start(host); err != nil {
+		return fmt.Errorf("unable to start flexmem server. %s", err.Error())
 	}
-
-	l, err := net.Listen("tcp", host)
-	if err != nil {
-		return fmt.Errorf("start server fail. %s", err.Error())
-	}
-	s.listener = l
-
-	go func() {
-		r.Accept(l)
-	}()
-
+	s.hs = hs
 	s.log.Info("Server started")
 	return nil
 }
 
 func (s *Server) Stop() {
 	s.log.Info("Server is closed")
+
 	go func() {
-		s.listener.Close()
+		if s.hs != nil {
+			s.hs.Stop()
+		}
 	}()
 }

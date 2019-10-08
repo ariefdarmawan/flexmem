@@ -2,43 +2,26 @@ package flexmem
 
 import (
 	"fmt"
-	"io"
-	"reflect"
 
 	"git.eaciitapp.com/sebar/dbflex"
 	"github.com/eaciit/toolkit"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type Cursor struct {
 	dbflex.CursorBase
-	mc *mongo.Cursor
 
-	tablename string
-	countParm toolkit.M
-	conn      *Connection
-	cursor    *mongo.Cursor
+	tablename  string
+	data       []toolkit.M
+	currentIdx int
 }
 
 func (cr *Cursor) Close() {
-	if cr.mc != nil {
-		cr.mc.Close(cr.conn.ctx)
-	}
+	cr.currentIdx = 0
+	cr.data = make([]toolkit.M, 0)
 }
 
 func (cr *Cursor) Count() int {
-	sr := cr.conn.db.RunCommand(cr.conn.ctx, cr.countParm)
-	if sr.Err() != nil {
-		dbflex.Logger().Errorf("unablet to get count. %s", sr.Err().Error())
-		return -1
-	}
-
-	countModel := new(struct{ N int })
-	if err := sr.Decode(countModel); err != nil {
-		dbflex.Logger().Errorf("unablet to decode count. %s", sr.Err().Error())
-		return -1
-	}
-	return countModel.N
+	return len(cr.data)
 }
 
 func (cr *Cursor) Fetch(out interface{}) error {
@@ -46,44 +29,49 @@ func (cr *Cursor) Fetch(out interface{}) error {
 		return toolkit.Errorf("unable to fetch data. %s", cr.Error())
 	}
 
-	if neof := cr.cursor.Next(cr.conn.ctx); !neof {
-		return io.EOF
+	if cr.currentIdx >= cr.Count() {
+
 	}
 
-	if err := cr.cursor.Decode(out); err != nil {
-		return toolkit.Errorf("unable to decode output. %s", err.Error())
+	m := cr.data[cr.currentIdx]
+	if err := toolkit.Serde(m, out, ""); err != nil {
+		return fmt.Errorf("cursor unable to cast. %s", err.Error())
 	}
 
+	cr.currentIdx++
 	return nil
 }
 
 func (cr *Cursor) Fetchs(result interface{}, n int) error {
 	if cr.Error() != nil {
-		return toolkit.Errorf("unable to fetch data. %s", cr.Error())
+		return toolkit.Errorf("unable to fetch data: %s", cr.Error())
 	}
 
-	v := reflect.TypeOf(result).Elem().Elem()
-	ivs := reflect.MakeSlice(reflect.SliceOf(v), 0, 0)
-
 	read := 0
+	ms := make([]toolkit.M, n)
+	count := cr.Count()
 	for {
-		if !cr.cursor.Next(cr.conn.ctx) {
+		if cr.currentIdx >= count {
 			break
 		}
 
-		iv := reflect.New(v).Interface()
-		err := cr.cursor.Decode(iv)
-		if err != nil {
-			return fmt.Errorf("unable to decode cursor data. %s", err.Error())
-		}
-		ivs = reflect.Append(ivs, reflect.ValueOf(iv).Elem())
+		ms[read] = cr.data[cr.currentIdx]
 
 		read++
+		cr.currentIdx++
 		if n != 0 && read == n {
 			break
 		}
 	}
-	reflect.ValueOf(result).Elem().Set(ivs)
+
+	if read < n {
+		ms = ms[0:read]
+	}
+
+	if err := toolkit.Serde(ms, result, ""); err != nil {
+		return fmt.Errorf("cursor unable to cast: %s", err.Error())
+	}
+
 	return nil
 }
 

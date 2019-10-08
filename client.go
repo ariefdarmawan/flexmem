@@ -2,19 +2,21 @@ package flexmem
 
 import (
 	"fmt"
-	"net/rpc"
+
+	"github.com/ariefdarmawan/rpchub"
+
+	"github.com/ariefdarmawan/rpchub/hubclient"
 )
 
 type Client struct {
 	host string
 
-	rc *rpc.Client
+	rc *hubclient.Client
 }
 
 func NewClient(host string) (*Client, error) {
 	c := new(Client)
-
-	rc, err := rpc.Dial("tcp", host)
+	rc, err := hubclient.NewClient(host)
 	if err != nil {
 		return nil, fmt.Errorf("unable to connect. %s", err.Error())
 	}
@@ -22,23 +24,12 @@ func NewClient(host string) (*Client, error) {
 	return c, nil
 }
 
-func (c *Client) Call(name string, parms ...interface{}) *Response {
-	res := new(Response)
-	if c.rc == nil {
-		res.err = fmt.Errorf("rpc client is not properly initialized")
-		return res
+func (c *Client) Call(name string, parms ...interface{}) *rpchub.Response {
+	if c == nil || c.rc == nil {
+		return rpchub.NewResponseWithErr("rpc client is not properly initialized")
 	}
 
-	req := new(Request)
-	req.Name = name
-	req.Parm = parms
-
-	if err := c.rc.Call("RpcProxy.Call", req, res); err != nil {
-		res.err = fmt.Errorf("%s error: %s", name, err.Error())
-		return res
-	}
-
-	return res
+	return c.rc.Call(name, parms...)
 }
 
 func (c *Client) Close() {

@@ -26,7 +26,7 @@ func TestServer(t *testing.T) {
 			convey.So(err, convey.ShouldBeNil)
 
 			convey.Convey("call status", func() {
-				r1 := fmc.Call("kvdb.status")
+				r1 := fmc.Call("KvDB.status")
 				convey.So(r1.Err(), convey.ShouldBeNil)
 
 				convey.Convey("validate", func() {
@@ -37,12 +37,12 @@ func TestServer(t *testing.T) {
 			})
 
 			convey.Convey("call ping", func() {
-				r1 := fmc.Call("kvdb.ping", "Arief Darmawan")
+				r1 := fmc.Call("KvDB.ping", "Arief Darmawan")
 				convey.So(r1.Err(), convey.ShouldBeNil)
 
 				convey.Convey("validate", func() {
 					data := string(r1.Data)
-					convey.So(data, convey.ShouldContainSubstring, "welcome to kvdb server")
+					convey.So(data, convey.ShouldContainSubstring, "welcome to KvDB server")
 					convey.Println("\nValidate result:", data)
 				})
 			})
